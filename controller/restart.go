@@ -22,19 +22,12 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	err := sshConnect.CreateConnect()
 	if err != nil {
 		log.Printf("cannot ssh vm err: %+v", err)
-		log.Printf("start to restart")
-		gceInstance := model.NewGceInstance(config.Project, config.Zone, config.Instance)
-		restartErr := gceInstance.RestartVM()
-		if restartErr != nil {
-			log.Printf("restart vm err: %+v", restartErr)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		if config.EnableRestart {
+			VmRestart(w, r)
 			return
 		}
-		if gceInstance.RestartStatus {
-			log.Printf("restart finished")
-			SuccessResponse(w, r)
-			return
-		}
+		http.Error(w, "Gateway Timeout", http.StatusGatewayTimeout)
+		return
 	}
 
 	err = sshConnect.NewSession()
@@ -46,7 +39,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 
 	defer sshConnect.Close()
 
-	log.Printf("start restart")
+	log.Printf("start to service restart")
 	var b bytes.Buffer
 	sshConnect.Session.Stdout = &b
 	err = sshConnect.Session.Run(config.SshCommand)
@@ -57,6 +50,22 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	log.Printf("restart finished")
 
 	SuccessResponse(w, r)
+}
+
+func VmRestart(w http.ResponseWriter, r *http.Request) {
+	log.Printf("start to VM reset")
+	gceInstance := model.NewGceInstance(config.Project, config.Zone, config.Instance)
+	restartErr := gceInstance.RestartVM()
+	if restartErr != nil {
+		log.Printf("restart vm err: %+v", restartErr)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	if gceInstance.RestartStatus {
+		log.Printf("reset finished")
+		SuccessResponse(w, r)
+		return
+	}
 }
 
 func SuccessResponse(w http.ResponseWriter, r *http.Request) {

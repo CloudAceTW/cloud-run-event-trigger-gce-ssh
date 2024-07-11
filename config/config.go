@@ -14,6 +14,8 @@ var (
 	Instance = os.Getenv("INSTANCE")
 
 	SshCommand = os.Getenv("SSH_COMMAND")
+
+	EnableRestart = os.Getenv("ENABLE_RESTART") == "true"
 )
 
 const (

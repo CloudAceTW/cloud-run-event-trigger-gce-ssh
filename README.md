@@ -61,6 +61,7 @@ This approach involves storing SSH keys in Secret Manager and granting the Cloud
       - `ZONE`: Zone where your GCE VM resides
       - `INSTANCE`: Name of your GCE VM
       - `SSH_COMMAND`: The command to execute on the VM (e.g., sudo systemctl restart nginx)
+      - `ENABLE_RESTART`: Boolean for enable reset GCE VM instance when SSH failed
 4. Build and Push the Image (Assuming you're using Skaffold)
     - Run the following command, replacing placeholders with your values:
       ```bash
