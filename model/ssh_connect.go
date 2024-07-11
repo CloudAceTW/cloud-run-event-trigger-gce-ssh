@@ -50,7 +50,7 @@ func (sc *SshConnect) CreateConnect() error {
 		},
 		HostKeyCallback:   ssh.FixedHostKey(ps),
 		HostKeyAlgorithms: []string{"ssh-ed25519"},
-		Timeout:           time.Millisecond * time.Duration(500),
+		Timeout:           time.Second * time.Duration(3),
 	}
 	var client *ssh.Client
 	for i := 1; i < 4; i++ {
@@ -58,7 +58,7 @@ func (sc *SshConnect) CreateConnect() error {
 		client, err = ssh.Dial("tcp", sc.Host, clientConfig)
 		if err != nil {
 			log.Printf("ssh.Dial err: %+v", err)
-			time.Sleep(time.Millisecond * time.Duration(i*500))
+			time.Sleep(time.Second * time.Duration(i))
 			continue
 		} else {
 			break

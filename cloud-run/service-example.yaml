@@ -41,6 +41,8 @@ spec:
           value: <VM_INSTANCE_NAME>
         - name: SSH_COMMAND
           value: <COMMAND> # sudo systemctl restart nginx
+        - name: ENABLE_RESTART
+          value: <ENABLE_RESTART> # bool, when true, restart the GCE VM
         resources:
           limits:
             cpu: 1000m
