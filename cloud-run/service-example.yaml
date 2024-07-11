@@ -1,0 +1,47 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: go-ssh-restart
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+spec:
+  template:
+    metadata:
+      labels:
+        run.googleapis.com/startupProbeType: Default
+      annotations:
+        autoscaling.knative.dev/maxScale: '100'
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/network-interfaces: '[{"network":"<YOUR_VPC>","subnetwork":"<YOUR_SUBNET>","tags":[]}]'
+        run.googleapis.com/client-name: cloud-console
+        run.googleapis.com/startup-cpu-boost: 'true'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: <YOUR_SERVICE_ACCOUNT>
+      containers:
+      - image: go-ssh-restart
+        env:
+        - name: SECRET_MANAGER_SSH_KEY
+          value: <SECRET_MANAGER_SSH_KEY_NAME>
+        - name: SECRET_MANAGER_HOST_KEY
+          value: <SECRET_MANAGER_HOST_KEY_NAME>
+        - name: AUTH_TOKEN
+          value: <RAMDOM_STRING_FOR_AUTH_TOKEN>
+        - name: VM_IP
+          value: <YOUR_VM_IP_AND_PORT> # 10.0.0.1:22
+        - name: VM_USER
+          value: <VM_SSH_USER>
+        - name: PROJECT
+          value: <VM_PROJECT_ID>
+        - name: ZONE
+          value: <VM_ZONE>
+        - name: INSTANCE
+          value: <VM_INSTANCE_NAME>
+        - name: SSH_COMMAND
+          value: <COMMAND> # sudo systemctl restart nginx
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi

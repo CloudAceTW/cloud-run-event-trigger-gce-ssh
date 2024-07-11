@@ -1,0 +1,36 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: go-ssh-restart
+build:
+  googleCloudBuild: {}
+  artifacts:
+    - image: go-ssh-restart
+      kaniko:
+        cache: {}
+manifests:
+  rawYaml:
+    - cloud-run/service.yaml
+deploy:
+  cloudrun: {}
+portForward:
+  - resourceType: service
+    resourceName: go-ssh-restart
+    localPort: 8080
+profiles:
+  - name: ci
+    build:
+      local:
+        useBuildkit: true
+      artifacts:
+      - image: go-ssh-restart
+        docker:
+          dockerfile: Dockerfile
+          cacheFrom: ["golang:1.22-bookworm", "gcr.io/distroless/static-debian12"]
+  - name: dev
+    build:
+      googleCloudBuild: {}
+      artifacts:
+      - image: go-ssh-restart
+        kaniko:
+          cache: {}
