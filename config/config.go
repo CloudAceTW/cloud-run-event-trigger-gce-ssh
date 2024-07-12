@@ -19,6 +19,15 @@ var (
 )
 
 const (
-	SshKeyIndex  = "sshKey"
-	HostKeyIndex = "hostKey"
+	SshKeyIndex       = "sshKey"
+	HostKeyIndex      = "hostKey"
+	SshRetryTimes     = 4
+	SshConnectTimeout = 4
+)
+
+var (
+	HostKeyAlgorithms = []string{
+		"ssh-ed25519",
+		"ssh-rsa",
+		"ecdsa-sha2-nistp256"}
 )
