@@ -49,11 +49,11 @@ func (sc *SshConnect) CreateConnect() error {
 			ssh.PublicKeys(s),
 		},
 		HostKeyCallback:   ssh.FixedHostKey(ps),
-		HostKeyAlgorithms: []string{"ssh-ed25519"},
-		Timeout:           time.Second * time.Duration(3),
+		HostKeyAlgorithms: config.HostKeyAlgorithms,
+		Timeout:           time.Second * time.Duration(config.SshConnectTimeout),
 	}
 	var client *ssh.Client
-	for i := 1; i < 4; i++ {
+	for i := 1; i <= config.SshRetryTimes; i++ {
 		// Connect to ssh server
 		client, err = ssh.Dial("tcp", sc.Host, clientConfig)
 		if err != nil {
@@ -95,7 +95,8 @@ func getSshAndHostKey() (map[string][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	secretChannel := make(chan ChannelObj, 2)
+	var secretChannelCount = 2
+	secretChannel := make(chan ChannelObj, secretChannelCount)
 	go getSecretManagerResult(client, config.SshKeyIndex, config.SecretManagerSshKey, secretChannel)
 	go getSecretManagerResult(client, config.HostKeyIndex, config.SecretManagerHostKey, secretChannel)
 
@@ -103,7 +104,7 @@ func getSshAndHostKey() (map[string][]byte, error) {
 		config.SshKeyIndex:  nil,
 		config.HostKeyIndex: nil,
 	}
-	for i := 0; i < 2; i++ {
+	for i := 0; i < secretChannelCount; i++ {
 		c := <-secretChannel
 		if !c.Status {
 			log.Printf("getSecretManagerResult for %s err: %+v", c.Key, c.Error)
