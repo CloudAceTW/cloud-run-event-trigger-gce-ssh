@@ -53,7 +53,7 @@ func (sc *SshConnect) CreateConnect() error {
 		Timeout:           time.Second * time.Duration(config.SshConnectTimeout),
 	}
 	var client *ssh.Client
-	for i := 1; i < config.SshRetryTimes+1; i++ {
+	for i := 1; i <= config.SshRetryTimes; i++ {
 		// Connect to ssh server
 		client, err = ssh.Dial("tcp", sc.Host, clientConfig)
 		if err != nil {
